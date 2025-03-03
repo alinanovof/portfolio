@@ -93,6 +93,7 @@ export const Form = styled.form`
   padding: 2rem;
   border-radius: 8px;
   box-shadow: 0 4px 10px ${({ theme }) => theme.shadow};
+  max-width: 90vw;
 
   @media (min-width: 962px) {
     display: grid;
@@ -198,6 +199,8 @@ export const SuccessMessage = styled.div`
 
 export const RecaptchaContainer = styled.div`
   margin-bottom: 1.5rem;
+  transform: scale(0.9);
+  transform-origin: 0 0;
 `;
 
 export const RequiredIndicator = styled.span`

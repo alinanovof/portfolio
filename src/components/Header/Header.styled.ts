@@ -1,4 +1,4 @@
-import styled from "styled-components";
+import styled, { keyframes } from "styled-components";
 import { ThemeType } from "../../themes";
 
 interface HeaderContainerProps {
@@ -10,6 +10,83 @@ interface ThemeToggleProps {
   currentTheme: "light" | "dark";
   theme: ThemeType;
 }
+
+interface MobileNavOverlayProps {
+  isOpen: boolean;
+  isClosing?: boolean;
+  theme: ThemeType;
+}
+
+interface NavLinkContainerProps {
+  delay: number;
+  exitDelay: number;
+  isClosing?: boolean;
+  theme: ThemeType;
+}
+
+interface CloseButtonProps {
+  isClosing?: boolean;
+  theme: ThemeType;
+}
+
+// Animations
+const fadeIn = keyframes`
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+`;
+
+const fadeOut = keyframes`
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+`;
+
+const slideDown = keyframes`
+  from {
+    transform: translateY(-100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+`;
+
+const slideUp = keyframes`
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+`;
+
+const slideUpOut = keyframes`
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+`;
+
+const slideDownOut = keyframes`
+  from {
+    transform: translateY(0);
+  }
+  to {
+    transform: translateY(100%);
+  }
+`;
 
 export const HeaderContainer = styled.header<HeaderContainerProps>`
   padding: 1.5rem 0;
@@ -50,18 +127,10 @@ interface NavProps {
 export const Nav = styled.nav<NavProps>`
   display: flex;
   gap: 2rem;
+  margin: auto;
 
   @media (max-width: 768px) {
-    display: ${({ isOpen }) => (isOpen ? "flex" : "none")};
-    flex-direction: column;
-    position: absolute;
-    top: 100%;
-    left: 0;
-    right: 0;
-    background: ${({ theme }) => theme.background};
-    padding: 1rem;
-    box-shadow: 0 4px 6px ${({ theme }) => theme.shadow};
-    text-align: center;
+    display: none; /* We'll use the overlay for mobile */
   }
 `;
 
@@ -69,6 +138,7 @@ export const NavLink = styled.a`
   color: ${({ theme }) => theme.text};
   font-weight: 500;
   position: relative;
+  text-decoration: none;
 
   &:after {
     content: "";
@@ -84,6 +154,23 @@ export const NavLink = styled.a`
   &:hover:after {
     width: 100%;
   }
+
+  @media (max-width: 768px) {
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin: 0.75rem 0;
+
+    &:after {
+      height: 3px;
+    }
+  }
+`;
+
+export const ControlsContainer = styled.div`
+  display: flex;
+  align-items: center;
+  flex-direction: row-reverse;
+  gap: 1rem;
 `;
 
 export const ThemeToggle = styled.div<ThemeToggleProps>`
@@ -147,6 +234,27 @@ export const ThemeToggle = styled.div<ThemeToggleProps>`
         currentTheme === "light" ? "1" : "0.5"};
     }
   }
+
+  @media (max-width: 768px) {
+    width: 45px;
+    height: 24px;
+
+    &:before {
+      width: 18px;
+      height: 18px;
+      left: ${({ currentTheme }) =>
+        currentTheme === "light" ? "3px" : "calc(100% - 21px)"};
+    }
+
+    .icon-container {
+      padding: 0 6px;
+
+      .light-icon,
+      .dark-icon {
+        font-size: 10px;
+      }
+    }
+  }
 `;
 
 export const MobileMenuButton = styled.button`
@@ -156,7 +264,89 @@ export const MobileMenuButton = styled.button`
     display: block;
     font-size: 1.5rem;
     color: ${({ theme }) => theme.text};
-    margin-left: auto;
-    margin-right: 1rem;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+  }
+`;
+
+export const MobileNavOverlay = styled.div<MobileNavOverlayProps>`
+  display: none;
+
+  @media (max-width: 768px) {
+    display: flex;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: ${({ theme }) =>
+      `${theme.background}f9`}; /* Slightly transparent */
+    backdrop-filter: blur(8px);
+    z-index: 100;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    animation: ${({ isClosing }) => (isClosing ? fadeOut : fadeIn)} 0.4s
+      ease-in-out forwards;
+    overflow: hidden;
+
+    .mobile-nav-content {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      padding: 2rem;
+      animation: ${({ isClosing }) => (isClosing ? slideDownOut : slideDown)}
+        0.4s ease-in-out forwards;
+    }
+  }
+`;
+
+export const CloseButton = styled.button<CloseButtonProps>`
+  position: absolute;
+  top: 1.5rem;
+  right: 1.5rem;
+  font-size: 2rem;
+  background: none;
+  border: none;
+  color: ${({ theme }) => theme.text};
+  cursor: pointer;
+  padding: 0.5rem;
+  z-index: 102;
+  border-radius: 50%;
+  width: 50px;
+  height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  animation: ${({ isClosing }) => (isClosing ? fadeOut : fadeIn)} 0.3s
+    ease-in-out forwards;
+
+  &:hover {
+    background-color: ${({ theme }) => `${theme.shadow}33`};
+    transform: rotate(90deg);
+  }
+`;
+
+export const NavLinkContainer = styled.div<NavLinkContainerProps>`
+  opacity: ${({ isClosing }) => (isClosing ? 1 : 0)};
+  animation: ${({ isClosing }) => (isClosing ? slideUpOut : slideUp)} 0.5s
+    ease-in-out forwards;
+  animation-delay: ${({ isClosing, delay, exitDelay }) =>
+    isClosing ? `${exitDelay}s` : `${delay}s`};
+  margin: 0.5rem 0;
+  padding: 0.5rem 1rem;
+  width: 100%;
+  max-width: 250px;
+  text-align: center;
+  border-radius: 8px;
+  transition: background-color 0.3s ease;
+
+  &:hover {
+    background-color: ${({ theme }) => `${theme.shadow}22`};
   }
 `;

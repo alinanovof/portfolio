@@ -110,7 +110,7 @@ const Contact: React.FC = () => {
 
   const getObfuscatedEmail = () => {
     const email = "alinanovof@gmail.com";
-    return email.replace(/(@)/, " [at] ").replace(/\./, " [dot] ");
+    return email.replace(/(@)/, "[at]").replace(/\./, "[dot]");
   };
 
   return (
@@ -139,7 +139,7 @@ const Contact: React.FC = () => {
                       window.location.href = `mailto:alinanovof@gmail.com?subject=Portfolio%20Inquiry`;
                     }}
                   >
-                    Send me an email ({getObfuscatedEmail()})
+                    Send me an email <br /> {getObfuscatedEmail()}
                   </a>
                 </div>
               </ContactInfoItem>
