@@ -93,10 +93,33 @@ export const Form = styled.form`
   padding: 2rem;
   border-radius: 8px;
   box-shadow: 0 4px 10px ${({ theme }) => theme.shadow};
+
+  @media (min-width: 962px) {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-gap: 1.5rem;
+
+    & > div:first-child {
+      grid-column: 1 / -1;
+    }
+
+    & > div:last-of-type {
+      grid-column: 1 / -1;
+    }
+
+    & > button {
+      grid-column: 1 / -1;
+    }
+  }
 `;
 
-export const FormGroup = styled.div`
+export const FormGroup = styled.div<{ fullWidth?: boolean }>`
   margin-bottom: 1.5rem;
+
+  @media (min-width: 962px) {
+    margin-bottom: 0;
+    grid-column: ${(props) => (props.fullWidth ? "1 / -1" : "auto")};
+  }
 `;
 
 export const Label = styled.label`
@@ -128,7 +151,7 @@ export const TextArea = styled.textarea`
   background-color: ${({ theme }) => theme.background};
   color: ${({ theme }) => theme.text};
   resize: vertical;
-  min-height: 150px;
+  min-height: 90px;
   transition: border-color ${({ theme }) => theme.transition};
 
   &:focus {
@@ -171,4 +194,13 @@ export const SuccessMessage = styled.div`
   border-radius: 4px;
   margin-bottom: 1rem;
   animation: fadeIn 0.3s ease-in;
+`;
+
+export const RecaptchaContainer = styled.div`
+  margin-bottom: 1.5rem;
+`;
+
+export const RequiredIndicator = styled.span`
+  color: ${({ theme }) => theme.error || "#ff0000"};
+  margin-left: 4px;
 `;

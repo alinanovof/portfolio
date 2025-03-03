@@ -48,7 +48,6 @@ const Projects: React.FC = () => {
 
   const closeProjectDetails = () => {
     setIsModalOpen(false);
-    // Optionally clear selectedProject after modal animation completes
     setTimeout(() => setSelectedProject(null), 300);
   };
 

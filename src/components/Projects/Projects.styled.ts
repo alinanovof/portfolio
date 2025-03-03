@@ -1,5 +1,3 @@
-// Projects.styled.tsx
-
 import styled from "styled-components";
 import { ThemeType } from "../../themes";
 

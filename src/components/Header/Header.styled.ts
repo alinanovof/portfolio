@@ -156,5 +156,7 @@ export const MobileMenuButton = styled.button`
     display: block;
     font-size: 1.5rem;
     color: ${({ theme }) => theme.text};
+    margin-left: auto;
+    margin-right: 1rem;
   }
 `;

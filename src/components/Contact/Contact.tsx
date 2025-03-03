@@ -1,7 +1,10 @@
-import React, { useState, ChangeEvent, FormEvent } from "react";
+import React, { useState, useRef, ChangeEvent, FormEvent } from "react";
 import { FadeIn } from "../../animations";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faGithub, faLinkedin } from "@fortawesome/free-brands-svg-icons";
+import emailjs from "@emailjs/browser";
+import ReCAPTCHA from "react-google-recaptcha";
+import { FormField, formFields } from "./formFields";
 import {
   ContactSection,
   SectionHeader,
@@ -17,6 +20,8 @@ import {
   TextArea,
   SubmitButton,
   SuccessMessage,
+  RecaptchaContainer,
+  RequiredIndicator,
 } from "./Contact.styled";
 
 interface FormData {
@@ -33,7 +38,8 @@ const Contact: React.FC = () => {
     subject: "",
     message: "",
   });
-
+  const [captchaValue, setCaptchaValue] = useState<string | null>(null);
+  const recaptchaRef = useRef<ReCAPTCHA>(null);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [submitted, setSubmitted] = useState<boolean>(false);
 
@@ -46,22 +52,55 @@ const Contact: React.FC = () => {
 
   const handleSubmit = (e: FormEvent<HTMLFormElement>): void => {
     e.preventDefault();
+
+    if (!captchaValue) {
+      alert("Please verify that you are not a robot");
+      return;
+    }
+
     setIsSubmitting(true);
 
-    // Simulate form submission
-    setTimeout(() => {
-      setIsSubmitting(false);
-      setSubmitted(true);
-      setFormData({ name: "", email: "", subject: "", message: "" });
+    const templateParams = {
+      name: formData.name,
+      email: formData.email,
+      subject: formData.subject,
+      message: formData.message,
+      "g-recaptcha-response": captchaValue,
+    };
 
-      // Hide success message after 5 seconds
-      setTimeout(() => {
-        setSubmitted(false);
-      }, 5000);
-    }, 1500);
+    emailjs
+      .send(
+        import.meta.env.VITE_EMAILJS_SERVICE_ID || "",
+        import.meta.env.VITE_EMAILJS_TEMPLATE_ID || "",
+        templateParams,
+        import.meta.env.VITE_EMAILJS_PUBLIC_KEY || ""
+      )
+      .then((response) => {
+        console.log("SUCCESS!", response.status, response.text);
+        setIsSubmitting(false);
+        setSubmitted(true);
+        setFormData({ name: "", email: "", subject: "", message: "" });
+
+        if (recaptchaRef.current) {
+          recaptchaRef.current.reset();
+        }
+        setCaptchaValue(null);
+
+        setTimeout(() => {
+          setSubmitted(false);
+        }, 5000);
+      })
+      .catch((err) => {
+        console.log("FAILED...", err);
+        setIsSubmitting(false);
+        alert("Failed to send message. Please try again later.");
+      });
   };
 
-  // Function to obfuscate email
+  const handleCaptchaChange = (value: string | null) => {
+    setCaptchaValue(value);
+  };
+
   const getObfuscatedEmail = () => {
     const email = "alinanovof@gmail.com";
     return email.replace(/(@)/, " [at] ").replace(/\./, " [dot] ");
@@ -136,64 +175,56 @@ const Contact: React.FC = () => {
           </ContactInfo>
 
           <Form onSubmit={handleSubmit}>
-            <FadeIn delay="0.2s">
-              {submitted && (
-                <SuccessMessage>
-                  Message sent successfully! I'll get back to you soon.
-                </SuccessMessage>
-              )}
+            {/* <FadeIn delay="0.2s"> */}
+            {submitted && (
+              <SuccessMessage>
+                Message sent successfully! I'll get back to you soon.
+              </SuccessMessage>
+            )}
 
-              <FormGroup>
-                <Label htmlFor="name">Name</Label>
-                <Input
-                  type="text"
-                  id="name"
-                  name="name"
-                  value={formData.name}
-                  onChange={handleChange}
-                  required
-                />
+            {formFields.map((field) => (
+              <FormGroup key={field.id} fullWidth={field.type === "textarea"}>
+                <Label htmlFor={field.id}>
+                  {field.label}
+                  {field.required && <RequiredIndicator>*</RequiredIndicator>}
+                </Label>
+                {field.type === "textarea" ? (
+                  <TextArea
+                    id={field.id}
+                    name={field.name}
+                    value={formData[field.name as keyof FormData]}
+                    onChange={handleChange}
+                    required={field.required}
+                    placeholder={field.placeholder}
+                  />
+                ) : (
+                  <Input
+                    type={field.type}
+                    id={field.id}
+                    name={field.name}
+                    value={formData[field.name as keyof FormData]}
+                    onChange={handleChange}
+                    required={field.required}
+                    placeholder={field.placeholder}
+                  />
+                )}
               </FormGroup>
+            ))}
+            <RecaptchaContainer>
+              <ReCAPTCHA
+                ref={recaptchaRef}
+                sitekey={import.meta.env.VITE_RECAPTCHA_SITE_KEY || ""}
+                onChange={handleCaptchaChange}
+              />
+            </RecaptchaContainer>
 
-              <FormGroup>
-                <Label htmlFor="email">Email</Label>
-                <Input
-                  type="email"
-                  id="email"
-                  name="email"
-                  value={formData.email}
-                  onChange={handleChange}
-                  required
-                />
-              </FormGroup>
-
-              <FormGroup>
-                <Label htmlFor="subject">Subject</Label>
-                <Input
-                  type="text"
-                  id="subject"
-                  name="subject"
-                  value={formData.subject}
-                  onChange={handleChange}
-                  required
-                />
-              </FormGroup>
-
-              <FormGroup>
-                <Label htmlFor="message">Message</Label>
-                <TextArea
-                  id="message"
-                  name="message"
-                  value={formData.message}
-                  onChange={handleChange}
-                  required
-                />
-              </FormGroup>
-
-              <SubmitButton type="submit" disabled={isSubmitting}>
-                {isSubmitting ? "Sending..." : "Send Message"}
-              </SubmitButton>
-            </FadeIn>
+            <SubmitButton
+              type="submit"
+              disabled={isSubmitting || !captchaValue}
+            >
+              {isSubmitting ? "Sending..." : "Send Message"}
+            </SubmitButton>
+            {/* </FadeIn> */}
           </Form>
         </ContactContainer>
       </div>

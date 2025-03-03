@@ -40,7 +40,7 @@ const About: React.FC = () => {
             <FadeIn>
               <h2>About Me</h2>
               <p>
-                With 3 years of professional experience, I've contributed to
+                With 3+ years of professional experience, I've contributed to
                 projects at Mprest, Karma, and Enroute, developing everything
                 from 3D mapping interfaces to e-commerce platforms.
               </p>

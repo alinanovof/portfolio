@@ -96,5 +96,9 @@ export const HeroImage = styled.div`
     &:hover {
       transform: translateY(-5px);
     }
+
+    @media (max-width: 992px) {
+      max-width: 300px;
+    }
   }
 `;
