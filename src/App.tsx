@@ -9,11 +9,16 @@ import About from "./components/About/About";
 import Contact from "./components/Contact/Contact";
 import Footer from "./components/Footer/Footer";
 import { FadeIn } from "./animations";
+import ReactGA from "react-ga4";
 import useLocalStorage from "./hooks/useLocalStorage";
 
 const App: React.FC = () => {
   const [theme, setTheme] = useState<"light" | "dark">("light");
   const { setLocalStorage, getLocalStorage } = useLocalStorage();
+
+  useEffect(() => {
+    ReactGA.send({ hitType: "pageview", page: location.pathname });
+  }, [location]);
 
   useEffect(() => {
     if (getLocalStorage("theme")) {

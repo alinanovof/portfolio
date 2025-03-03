@@ -5,6 +5,7 @@ import { faGithub, faLinkedin } from "@fortawesome/free-brands-svg-icons";
 import emailjs from "@emailjs/browser";
 import ReCAPTCHA from "react-google-recaptcha";
 import { formFields } from "./formFields";
+import ReactGA from "react-ga4";
 import {
   ContactSection,
   SectionHeader,
@@ -57,6 +58,12 @@ const Contact: React.FC = () => {
       alert("Please verify that you are not a robot");
       return;
     }
+
+    ReactGA.event({
+      category: "Form",
+      action: "Submit",
+      label: "Contact Form Submit",
+    });
 
     setIsSubmitting(true);
 
